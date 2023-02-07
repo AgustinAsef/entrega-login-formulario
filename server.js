@@ -69,18 +69,17 @@ sessionRout.post('/', (req,res )=>{
     const {userEmail , userPasword} = req.body
     console.log(userEmail , userPasword)
     const dbUser = userDB.getByMail(userEmail)
-    console.log(dbUser)
-/*    if (!dbUser) {
-        res.render('loginError.html')
-    }else{
-        req.session.userName= dbUser.userName //no se por que me dice que los req.session. son parametros indefinidos
-        req.session.userLastName = dbUser.userLastName
-        req.session.userEmail = dbUser.userEmail
-        req.session.isAdmin = dbUser.admin 
-        req.session.count = dbUser.count
-        res.redirect('/login/userData')
-    } */
-})
+    if (dbUser.pasword == userPasword) {
+            req.session.userName= dbUser.userName //no se por que me dice que los req.session. son parametros indefinidos
+            req.session.userLastName = dbUser.userLastName
+            req.session.userEmail = dbUser.userEmail
+            req.session.isAdmin = dbUser.admin 
+            req.session.count = dbUser.count
+            res.redirect('/login/userData')    }
+        else{
+            res.render('loginError.html')
+        }
+    })
 
 sessionRout.get('/userData', (req, res) => {
     if (!req.session.userEmail) {
@@ -106,9 +105,8 @@ sessionRout.post('/register', (req, res) => {
             contraseña: userPasword,
     }
     console.log(userDB.save(newUSer))
-/*     console.log(userDB.getAll()) */
-/*     res.redirect("/login")
- */})
+    res.redirect("/login")
+})
 
 sessionRout.delete('/logout', (req, res) =>{
     req.session.destroy(err =>{
