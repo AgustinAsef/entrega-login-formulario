@@ -1,16 +1,20 @@
 <div>
-    <form action="/session/register" method="post">
+    <form action="/login/register" method="post">
         <div>
-            <input type="text" placeholder="Nombre" id="userName" name="userName">   
+            <input type="email" placeholder="Email" id="userEmail" name="userEmail" required>   
         </div>
         <div>
-            <input type="text" placeholder="Apellido" id="lastName" name="lastName">   
+            <input type="text" placeholder="Nombre" id="userName" name="userName" required>   
         </div>
         <div>
-            <input type="text" placeholder="Contraseña" id="pasword" name="pasword">   
-        </div>    
+            <input type="text" placeholder="Apellido" id="lastName" name="userLastName" required>   
+        </div>
+        <div>
+            <input type="password" placeholder="Contraseña" id="userPasword" name="userPasword" required>   
+        </div>
+        <div>
+            <button type="submit">Iniciar session</button>
+        </div>            
     </form>
-    <div>
-        <button onclick="location.href = '/login'">Iniciar session</button>
-    </div>
+
 </div>

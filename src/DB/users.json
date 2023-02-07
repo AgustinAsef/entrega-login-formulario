@@ -1,0 +1,14 @@
+[
+  {
+    "nombre": "Agustin",
+    "apellido": "Asef",
+    "email": "agusasef@gmail.com",
+    "contraseña": "123"
+  },
+  {
+    "nombre": "pedro",
+    "apellido": "sanches",
+    "email": "pedrosanchez@gmail.com",
+    "contraseña": "123"
+  }
+]

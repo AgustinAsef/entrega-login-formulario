@@ -4,6 +4,7 @@ import exphbs from 'express-handlebars'
 import path from 'path'
 import dotenv from 'dotenv'
 import MongoStore from 'connect-mongo'
+import ContainerUsers from "./src/container/ContainerUser.js"
 
 dotenv.config()
 
@@ -18,22 +19,15 @@ app.use(express.static('views'))
 //motor de plantillas
 app.set('views', 'src/views')
 app.engine('.html', exphbs.engine({
-    defaultLayout: 'session', //se me renderiza el archivo que tengo puesto aca en vez del que pongo en el res.render
+    defaultLayout: 'userData', //se me renderiza el archivo que tengo puesto aca en vez del que pongo en el res.render
     layoutsDir: path.join(app.get('views')),
-    extname: '.html'
+    extname:'.html'
 }))
 app.set('views engine', '.html')
 
 //session
 const sessionRout = new Router() 
 app.use('/login', sessionRout)
-/* const mongodb = { 
-    cnxStr: 'mongodb+srv://admin:15741806@cluster0.7hch6pf.mongodb.net/ecomerceback?retryWrites=true&w=majority',
-    options: { 
-        useNewUrlParser: true, 
-        useUnifiedTopology: true,
-    }
-} */
 
 app.use(session({
     store: MongoStore.create({
@@ -47,59 +41,74 @@ app.use(session({
     }
 }))
 
+const userDB = new ContainerUsers()
+
 //DB
 
 const usuarios = [
     {
-    name: 'pablo',
-    lastName: 'rodrigez',
-    pasword: 123,
-    admin: true,
-    count: 0
+        userName:'pablo',
+        userLastName: 'rodrigez',
+        userEmail: 'pablitor@gmail.com',
+        pasword: "123",
+        admin: true,
+        count: 0
       }
 ]
 //router y navegacion
 sessionRout.get('/', (req, res) => {
-    if (!req.session) {
-        res.send('registrate o inicia sessions') //res.render(el formulario de ingreso)
+    if (!req.session.userEmail) {
+        res.render("login.html")
     }else{
-        req.session.count ++
-        res.send(`bienvenido otra vez ${req.session.name}, ya haz visitado este sitio ${req.session.count} veces`)
-        //res.redirect(datos personales del cliente)
+        res.redirect('/login/userData')
         } 
 })
 
 
 sessionRout.post('/', (req,res )=>{
-    const {userName , pasword} = req.body
-    const dbUser = usuarios.find(usuario => usuario.name === userName && usuario.pasword === pasword)
+    const {userEmail , userPasword} = req.body
+    console.log(userEmail , userPasword)
+    const dbUser = userDB.getByMail(userEmail)
     console.log(dbUser)
-   if (!dbUser) {
-        res.send("no se encontro el usuario, prueba ingresar tus datos correctamente o leguearte")
+/*    if (!dbUser) {
+        res.render('loginError.html')
     }else{
-        req.session.name= dbUser.name //no se por que me dice que los req.session. son parametros indefinidos
-        req.session.pasword = dbUser.pasword
+        req.session.userName= dbUser.userName //no se por que me dice que los req.session. son parametros indefinidos
+        req.session.userLastName = dbUser.userLastName
+        req.session.userEmail = dbUser.userEmail
+        req.session.isAdmin = dbUser.admin 
         req.session.count = dbUser.count
-        req.session.isAdmin = dbUser.admin
-        req.session.count ++
-        res.send(`bienvenido otra vez ${req.session.name}, ya haz visitado este sitio ${req.session.count} vez`)
-        //res.render de la pagina con la informacion del usuario
-    }
+        res.redirect('/login/userData')
+    } */
 })
 
+sessionRout.get('/userData', (req, res) => {
+    if (!req.session.userEmail) {
+        res.render('loginError.html')
+    } else {
+        const {userEmail} = req.body
+        const userData = userDB.getByMail(usuario =>{return usuario.userEmail === userEmail})
+        res.render('userData.html',{
+            userData : userData
+    })}
+})
+
+sessionRout.get('/register', (req, res) => {
+    res.render('newUserForm.html')
+})
 
 sessionRout.post('/register', (req, res) => {
-    const {userName, userLastName, pasword} = req.body
+    const {userEmail ,userName, userLastName, userPasword} = req.body
     let newUSer= {
-            userName: userName,
-            lastName: userLastName,
-            pasword: pasword,
-            admin: true,
-            count: 0
+            nombre:userName,
+            apellido: userLastName,
+            email: userEmail,
+            contraseña: userPasword,
     }
-    usuarios.push(newUSer)
-    res.send("login exitoso")//res.redirect(al login para iniciar la session)
-})
+    console.log(userDB.save(newUSer))
+/*     console.log(userDB.getAll()) */
+/*     res.redirect("/login")
+ */})
 
 sessionRout.delete('/logout', (req, res) =>{
     req.session.destroy(err =>{
